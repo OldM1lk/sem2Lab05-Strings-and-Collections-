@@ -5,6 +5,14 @@ using System.Text.RegularExpressions;
 
 namespace StringsAndCollections {
   class Program {
+    static string ReplacePhoneNumber(string input, Match match) {
+      string phoneNumber = match.Value;
+      string replacedPhoneNumber = "+380 " + phoneNumber.Substring(2, 2) + " " + phoneNumber.Substring(6, 3)
+                                   + " " + phoneNumber.Substring(10, 2) + " " + phoneNumber.Substring(13, 2);
+      
+      return input.Replace(match.Value, replacedPhoneNumber);
+    }
+
     static void Main(string[] args) {
       Console.Write("Введите директорию: ");
       string directoryPath = Console.ReadLine();
@@ -27,11 +35,11 @@ namespace StringsAndCollections {
         {"прывет", "привет"},
         {"привэт", "привет"},
         {"привят", "привет"},
-        {"прювет", "привет"}
+        {"прювет", "привет"},
+        {"прявет", "привет"}
       };
       string numberToFind = @"\((\d{3})\) (\d{3})-(\d{2})-(\d{2})";
-      string numberToReplace = "+38 $1 $2 $3 $4";
-      string[] filesInPath = Directory.GetFiles(directoryPath, "*.txt", SearchOption.AllDirectories);
+      string[] filesInPath = Directory.GetFiles(directoryPath, "*.txt");
 
       foreach (string file in filesInPath) {
         string fileContent = File.ReadAllText(file);
@@ -40,8 +48,11 @@ namespace StringsAndCollections {
           fileContent = fileContent.Replace(wrongWord.Key, wrongWord.Value);
         }
 
-        Regex regex = new Regex(numberToFind);
-        fileContent = regex.Replace(fileContent, numberToReplace);
+        MatchCollection matches = Regex.Matches(fileContent, numberToFind);
+
+        foreach (Match match in matches) {
+          fileContent = ReplacePhoneNumber(fileContent, match);
+        }
 
         File.WriteAllText(file, fileContent);
       }
